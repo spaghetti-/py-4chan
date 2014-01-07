@@ -5,7 +5,7 @@ import py4chan
 
 def main():
     v = py4chan.Board('v')
-    thread = v.getThread(152900882)
+    thread = v.getThread(226134881)
     print thread
     print 'Sticky?', thread.Sticky
     print 'Closed?', thread.Closed

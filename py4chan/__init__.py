@@ -18,8 +18,8 @@ import base64
 
 _4CHAN_API = 'api.4chan.org'
 _4CHAN_BOARDS_URL = 'boards.4chan.org'
-_4CHAN_IMAGES_URL = 'images.4chan.org'
-_4CHAN_THUMBS_URL = '0.thumbs.4chan.org'
+_4CHAN_IMAGES_URL = 'i.4cdn.org'
+_4CHAN_THUMBS_URL = 't.4cdn.org'
 _BOARD = '%s/%i.json'
 _THREAD = '%s/res/%i.json'
 _VERSION = '0.1.2'
@@ -29,7 +29,8 @@ class Board(object):
         self._https = https
         self._base_url = ('http://' if not https else 'https://') + apiUrl
         self._board_name = boardName
-        self._requests_session = session or requests.session(headers = {'User-Agent': 'py-4chan/%s' % _VERSION})
+        self._requests_session = session or requests.session()
+        self._requests_session.headers.update({'User-Agent': 'py-4chan/%s' % _VERSION})
         self._thread_cache = {}
 
     def getThread(self, id, updateIfCached = True):
@@ -123,7 +124,10 @@ class Thread(object):
             Is the thread closed?
             :return: bool
         """
-        return self.topic._data['closed'] == 1
+        try:
+            return self.topic._data['closed'] == 1
+        except KeyError:
+            return False
 
     @property
     def Sticky(self):
@@ -131,7 +135,10 @@ class Thread(object):
             Is the thread sticky?
             :return: bool
         """
-        return self.topic._data['sticky'] == 1
+        try:
+            return self.topic._data['sticky'] == 1
+        except KeyError:
+            return False
 
     @staticmethod
     def _fromRequest(board, res, id):
@@ -149,7 +156,7 @@ class Thread(object):
         t = Thread(board, id)
         t._last_modified = last_modified
 
-        posts = json['posts']
+        posts = json()['posts']
 
 
         t.topic = Post(t, posts[0])
@@ -301,7 +308,10 @@ class Post(object):
 
     @property
     def Subject(self):
-        return self._data['sub'] or None
+        try:
+            return self._data['sub']
+        except KeyError:
+            return None
     
     @property
     def Comment(self):
